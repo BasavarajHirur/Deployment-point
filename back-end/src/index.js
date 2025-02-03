@@ -3,6 +3,7 @@ const app = express();
 const port = 3000;
 const connectDB = require('./config/database');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 const authRouter = require('./router/auth');
 const profileRouter = require('./router/profile');
@@ -11,6 +12,12 @@ const userRouter = require('./router/user');
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors(
+    {
+        origin:"http://localhost:4200",
+        credentials: true
+    }
+));
 
 app.use('/', authRouter);
 app.use('/', profileRouter)
