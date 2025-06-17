@@ -21,48 +21,79 @@ When you deleted files from git how to restore
 2.git status
 3.git restore .
 
-# Deplooyement
+# Deployement
 
 1. create aws ec2 instance 
 2. select any operating system
 3. genereate key pair 
 4. connect to ec2 instance using ssh
 5. open terminal and go to path where key pair file is located
-6. run command chmod 400 your-key.pem
-6. run command ssh -i "keypairfile.pem" ec2-user@ec2-xx- ( which is provided in ec2 ssh)
-7. install node using curl command
+6. run command chmod 400 your-key.pem (for changin permission)
+6. run command ssh -i "keypairfile.pem" ec2-user@ec2-xx- ( which is provided in ec2 ssh) (connecting machine)
+7. install node using curl command (check official nodejs)
 8. install nvm (version should be same as your project) ex: nvm install 16.7.0
-9. clone your git to remote system
+9. If NVM not found showing on screen close terminal using command 'exit' and reconnect
+10. clone your git to remote system
+11. If git not installed on ec2 machine use command - sudo yum install git -y 
 
   ## deploy front end
   1. go to frond end project directory and install npm packages
   2. build project using command :npm run build
   3. if you want to see files type ls
-  4. to update ubantu versio : sudo apt update
-  5. install nginx using command: sudo apt install nginx
+  4. to update version : sudo apt update(for ubantu), sudo yum update -y(for linux)
+  5. install nginx using command: sudo apt install nginx(ubantu), sudo dnf install nginx -y(linux)
   6. start nginx using command: sudo systemctl start nginx
   7. enable nginx using command: sudo systemctl enable nginx
-  8. copy code from dist folder to nginx http server(to/var/www/html)
+  8. check path of /var/www/html but default location is - /usr/share/nginx/html/
+  9. If /var/www/html is not exist create it using commad - sudo mkdir -p /var/www/html
+  10. copy code from dist folder to /var/www/html using command
      sudo scp -r dist/* var/www/html (copy command)
-  9. enable port :80 of our instance by adding inbound rules
-     ex: type is custom tcp port is 80
-
-     if nginx already started simply use this to deploy 
+  11. If folder is copied to html instead of file then you can use this command to move files
+      sudo mv folder-name/* ./  (you should be on path where you are copying)
+  12. enable port :80 of our instance by adding inbound rules
+     ex: type custom tcp port is 80
+  13. if nginx already started simply use this to deploy 
      *npm run build
-     *sudo scp -r dist/* var/www/html
+     *sudo scp -r dist/* var/www/html (sudo scp -r source distination)
+   14. If the location is different than var/www/html use below command to move files to that location
+     sudo cp -r /var/www/html/* /usr/share/nginx/html/ (for moving files to /usr/share/nginx/html/)
+   15. or you can change the default location to your choice using command
+       sudo rm /usr/share/nginx/html/index.html (rm path) - to remove file
+       sudo cp /var/www/html/index.html /usr/share/nginx/html/ - copy
+   16. restart nginx
+      sudo systemctl restart nginx
+  17. If you want remove all files from the path use below command ex path is: /usr/share/nginx/html/
+        sudo rm -rf /usr/share/nginx/html/*
+
+
+      additional commands
+      rm - to remove
+      cp - copies within same machine
+      scp - socure copied between two diff machines ex: local to nginx server
+
+      main commands if already setup
+      1. sudo scp -r dist/folder/* var/www/html
+      2. sudo systemctl restart nginx
 
   ## deploy back end
   1. go to backend project directory and install npm packages
   2. start server using command: npm run start (this is for temporary)
-  3. add network access in mongodb : add ip of ec2
-  4. add inbound rules for port 3000 in ec2 security group
-  5. install the pm2 : npm install pm2 -g (to stay always start server)
-  6. start server using command : pm2 start npm -- start
-  7. check log using : pm2 log
-  8. check pm2 details using : pm2 list
-  9. to stop server using command : pm2 stop name
-  10. to delete server using command : pm2 delete name
-  11. to change server name using command : pm2 rename name newname
+  3. If port is already in use. Then run command and kill port
+     sudo lsof -i :7777
+     output will be like this :
+     COMMAND   PID     USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+     node    32277 ec2-user   28u  IPv6  58607      0t0  TCP *:cbt (LISTEN)
+     then kill port using below command
+     sudo kill -9 32277
+  4. add network access in mongodb : add ip of ec2
+  5. add inbound rules for port 3000 in ec2 security group
+  6. install the pm2 : npm install pm2 -g (to stay always start server)
+  7. start server using command : pm2 start npm -- start or pm2 start npm --name "Name" -- start
+  8. check log using : pm2 log, to plush : pm2 flush name
+  9. check pm2 details using : pm2 list
+  10. to stop server using command : pm2 stop name
+  11. to delete server using command : pm2 delete name
+  12. to change server name using command : pm2 rename name newname
      or if you want to give initially instead of default : pm2 start npm --name newname -- start
 
   ## Connect backend and front end
@@ -76,12 +107,24 @@ When you deleted files from git how to restore
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
-  2. run command : sudo nano /etc/nginx/sites-available/default
-  3. edit server name instead of _ change ip of ec2(or if you have domain name change it to it)
-  4. below of server name add location /api which is copied from chatgpt
-  5. save it
-  6. restart nginx using command : sudo systemctl restart nginx
-  7. modify front end BASE_URL
+
+    special case whe you refresh page if page not found then it will show 404 error use below to reload on index.html
+    
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+  2. Check if there is other config files using -  
+    sudo find /etc/nginx -type f 
+  3. If nothing is in sites-available, then edit the main config file:
+    sudo nano /etc/nginx/nginx.conf
+    If there is sites-available then use below
+    sudo nano /etc/nginx/sites-available/default
+  4. edit server name instead of _ change ip of ec2(or if you have domain name change it to it)
+  5. below of server name add location /api which is copied from chatgpt
+  6. save it
+  7. restart nginx using command : sudo systemctl restart nginx
+  8. modify front end BASE_URL to configured nginx ex: '/api'
 
   ## domain change
   1. go to godaddy(I preferred) website and purchase your domain.
