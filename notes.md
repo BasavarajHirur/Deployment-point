@@ -72,8 +72,10 @@ When you deleted files from git how to restore
       scp - socure copied between two diff machines ex: local to nginx server
 
       main commands if already setup
-      1. sudo scp -r dist/folder/* var/www/html
-      2. sudo systemctl restart nginx
+      1. git pull
+      2. npm run build
+      3. sudo scp -r dist/folder/* /usr/share/nginx/html/
+      4. sudo systemctl restart nginx
 
   ## deploy back end
   1. go to backend project directory and install npm packages
@@ -98,7 +100,15 @@ When you deleted files from git how to restore
 
   ## Connect backend and front end
   1. nginx proxy pass api to 3000 (search it on chatgpt for config)
-    Ex:  
+  2. Check if there is other config files using -  
+    sudo find /etc/nginx -type f 
+  3. If nothing is in sites-available, then edit the main config file:
+    sudo nano /etc/nginx/nginx.conf
+    If there is sites-available then use below
+    sudo nano /etc/nginx/sites-available/default
+  4. edit server name instead of _ change ip of ec2(or if you have domain name change it to it)
+  5. below of server name add location /api which is copied from chatgpt
+  Ex:  
     server_name yourdomain.com;
     location /api/ {
         proxy_pass http://localhost:3000/;
@@ -113,15 +123,6 @@ When you deleted files from git how to restore
     location / {
         try_files $uri $uri/ /index.html;
     }
-
-  2. Check if there is other config files using -  
-    sudo find /etc/nginx -type f 
-  3. If nothing is in sites-available, then edit the main config file:
-    sudo nano /etc/nginx/nginx.conf
-    If there is sites-available then use below
-    sudo nano /etc/nginx/sites-available/default
-  4. edit server name instead of _ change ip of ec2(or if you have domain name change it to it)
-  5. below of server name add location /api which is copied from chatgpt
   6. save it
   7. restart nginx using command : sudo systemctl restart nginx
   8. modify front end BASE_URL to configured nginx ex: '/api'
@@ -130,6 +131,13 @@ When you deleted files from git how to restore
   1. go to godaddy(I preferred) website and purchase your domain.
   2. You can also do DNS thorugh godaddy or you can use cloudflare website
   3. verify and secure your domain on cloudflare
-  4. copy namserver from cloudflare and add it to godaddy.
-  5. wait for somtime to our namserver get update on cloudflare (around 15-20 mnts)
-  6. add DNS 'A' record to your ip address on cloudflare
+  4. add you purchased domain on cloudflare and scan for DNS records
+  5. go to free plan
+  6. continue to activation
+  7. copy name servers from cloudflare
+  8. Go to DNS name servers section of goDaddy and change name servers and add copied cloudflare name servers
+  9. Go to cloudflare check name servers now once it is available(it will take some minutes)
+  10. Go to cloudflare and go to DNS Records and delete A records or edit A record and add you domain pointing to your ip
+  11. Add SSL and in custom select flexible
+  12. check edge certificate , there is option automatic https. Enable it
+ 
