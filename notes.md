@@ -97,6 +97,7 @@ When you deleted files from git how to restore
   11. to delete server using command : pm2 delete name
   12. to change server name using command : pm2 rename name newname
      or if you want to give initially instead of default : pm2 start npm --name newname -- start
+  13. Remember after every package install you need to run npm install in server
 
   ## Connect backend and front end
   1. nginx proxy pass api to 3000 (search it on chatgpt for config)
@@ -140,4 +141,23 @@ When you deleted files from git how to restore
   10. Go to cloudflare and go to DNS Records and delete A records or edit A record and add you domain pointing to your ip
   11. Add SSL and in custom select flexible
   12. check edge certificate , there is option automatic https. Enable it
+
+  # Sending an Email through SES
+  1. create IAM user and attach rule(you can give full access)
+  2. Go to aws SES
+  3. create a identity from SES by providing domain name and email as well
+  4. open cloudflare and add DNS to to your domain
+  5. make sure trun off proxy to your added DNS, DNS name and value should copy from AWS SES
+  6. It may take some time to verify your domain
+  7. Go to AWS SES get set up page and click on request from production
+  8. provide details and submit
+  9. got to IAM User and create access key select other
+  10. copy access key and secret key, create .env file add these details
+  11. search on the google for AWS SES nodejs documentation
+  12. Go for latest one(for now v3) and get code example for sending an email or you can get it from git hub repo (https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/javascriptv3/example_code/ses#code-examples)
+  13. Here you need to install some dependencied in your backend code
+  14. In code there are some imports you need create folder for sesClient and add sesClient code from git hub, sendemail file add sendEmail code from git hub
+  15. Alter the code like new credential should be add refer sesClient.js
+  14. install @aws-sdk/client-ses and change code formate like instead of import -> require and so on
+  15. you can run your function and verify
  
