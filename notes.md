@@ -160,4 +160,16 @@ When you deleted files from git how to restore
   15. Alter the code like new credential should be add refer sesClient.js
   14. install @aws-sdk/client-ses and change code formate like instead of import -> require and so on
   15. you can run your function and verify
+
+  # Scheduling cron jon in nodeJs
+  1. install node-cron package
+  2. create a file in your backend folder and name it as cron.js
+  3. learn about expression in cron guru
+  4. Schedule job
+  5. Install data-fns optional to set timezone
+
+  For bulk email 
+  1. Follow batch mechanism
+  2. que mechanism using ams SES or bee-queue npm package
+
  
