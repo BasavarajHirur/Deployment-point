@@ -108,7 +108,7 @@ When you deleted files from git how to restore
   1. go to backend project directory and install npm packages
   2. start server using command: npm run start (this is for temporary)
   3. If port is already in use. Then run command and kill port
-     sudo lsof -i :7777
+     sudo lsof -i :<port number>
      output will be like this :
      COMMAND   PID     USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
      node    32277 ec2-user   28u  IPv6  58607      0t0  TCP *:cbt (LISTEN)
@@ -169,6 +169,15 @@ When you deleted files from git how to restore
   11. Add SSL and in custom select flexible
   12. check edge certificate , there is option automatic https. Enable it
   13. For better maintainance you can make your ec2 ip to elastic and replace static ip with wherever you used old one
+
+  ## [v] dot env Backend
+  1. Place you all secret related information inside .env
+  2. you need to install dotenv package using npm install dotenv
+  3. For production you need create .env file in your root project manually using
+     nano /home/ec2-user/devTinderBackEnd/.env
+  4. And add all your data here
+
+
 
 # [II] Sending an Email through SES
 1. create IAM user and attach rule(you can give full access)
@@ -245,6 +254,15 @@ When you deleted files from git how to restore
   9. When you are sending message allow only who are already frnds
   10. Show last seen logic by storing establish connection
   11. Limit message loading when fetching from Db - add pagination 
+  12. Remeber you need to add nginx configuration for prod
+    location /api/socket.io/ {
+    proxy_pass http://localhost:3000/socket.io/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+}
 
   ## [ii] Front End
   1. create chat component for chat, and use query param to get to which user your chatting 
